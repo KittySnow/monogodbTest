@@ -1,0 +1,255 @@
+function ConvertBlocks(){
+    var o = this;
+    o.x = 0;
+    o.y = 0;
+    o.xMax = 20;
+    o.yMax = 20;
+    o.posList=[];
+}
+
+ConvertBlocks.prototype.sortNumber = function (a,b){
+    return a - b
+};
+
+//添加例如[3,5]
+ConvertBlocks.prototype.addPos = function(arr){
+    this.posList.push(arr[0]);
+    this.posList.push(arr[1]);
+};
+
+//添加例如[3,5]
+ConvertBlocks.prototype.getPos = function(){
+    return this.posList;
+};
+
+//添加例如[3,5]
+ConvertBlocks.prototype.resetPos = function(arr){
+    this.posList = [];
+};
+
+//按照X的坐标提取不重复的X轴
+ConvertBlocks.prototype.followX = function(){
+    var b = [];
+    var t = {};
+    var posList = this.posList;
+    this.posList.forEach(function(data,index){
+        if(index%2==0){
+            if(b.indexOf(data)==-1){
+                b.push(data);
+                t['x'+data] = [posList[index+1]];
+            }else{
+                t['x'+data].push(posList[index+1]);
+                t['x'+data].sort(this.sortNumber);
+            }
+        }
+    });
+    return t;
+};
+
+ConvertBlocks.prototype.convertPos = function(tt){
+    var b = [];
+    tt.forEach(function(data,index){
+        b[index] = [[data[0],data[1]],[data[0],data[3]],[data[2],data[1]],[data[2],data[3]]];
+    });
+    return b;
+};
+
+//合并例如[3,4],[3,5]
+ConvertBlocks.prototype.conX = function(){
+    var a = [];
+    a.push.apply(a, arguments);
+    var b = [];
+    a.forEach(function(data,index){
+        if(index%2==0){
+            b.push(data)
+        }
+    });
+    return b;
+};
+
+ConvertBlocks.prototype.contactX = function(a){
+    var b =[];
+    a.forEach(function(data,index){
+        if(index%2==0){
+            b.push(data)
+        }
+    });
+    return b;
+};
+
+ConvertBlocks.prototype.contactY = function(a){
+    console.log('aaaaaaaaaaaaaaaaaaaaaa',a);
+    var b = [];
+    a.forEach(function(data,index){
+        if(index%2==1){
+            b.push(data)
+        }
+    });
+    return b;
+};
+//转成坐标 但是未排序
+ConvertBlocks.prototype.onlyPos =function(tt) {
+    var b = [];
+    var len = tt.length;
+    tt.forEach(function(data,index){
+        if(index==0 || data[0].toString() != tt[index-1][2].toString()){
+            b.push(data[0][0]);
+            b.push(data[0][1]);
+        }
+        if(index==0 || data[1].toString() != tt[index-1][3].toString()){
+            b.push(data[1][0]);
+            b.push(data[1][1]);
+        }
+
+        if(index==len-1 || data[2].toString() != tt[index+1][0].toString()){
+            b.push(data[2][0]);
+            b.push(data[2][1]);
+        }
+        if( index==len-1 || data[3].toString() != tt[index+1][1].toString()){
+            b.push(data[3][0]);
+            b.push(data[3][1]);
+        }
+    });
+    console.log('xxxxxxxxxxxxxxxxxxxx',b);
+    return b;
+
+};
+
+ConvertBlocks.prototype.orderPos =function(arr) {
+    //var arr =  [0, 0, 0, 64, 64, 64, 64, 32, 96, 0, 96, 32];
+    var maxY = this.yMax1();
+    var b = this.contactY(arr);
+    console.log('bbbbbbbbbbbbbb',b);
+    var order= false;
+    var num = 0;
+    var arr1 = [];
+    for(var i=0;i<b.length;i++){
+        if(b[i]==maxY){
+            order= true;
+            num = i;
+        }
+        if(!order || (order && i<= num+1)){
+            arr1.push(arr[2*i]);
+            arr1.push(b[i]);
+        }
+    }
+    console.log('2222222222222222222222222222',arr1);
+    var t = [];
+    var x1= [];
+    for(var p = b.length-1 ;p>num ;p--){
+        t.push(b[p]);
+        x1.push(arr[2*p]);
+    }
+    //让Y值排序
+    for(var i=0;i<t.length-1;i++){
+        for(var j=i+1;j<t.length;j++){
+            if(x1[i]==x1[j]){//如果前面的数据比后面的大就交换
+                if(t[i]>t[j]){
+                    var temp1 = t[i];
+                    t[i]=t[j];
+                    t[j]=temp1;
+                }
+            }
+        }
+    }
+    for(var i=t.length-1;i>=0;i--){
+        arr1.push(x1[i]);
+        arr1.push(t[i]);
+    }
+    console.log(arr1);
+    return arr1;
+};
+
+ConvertBlocks.prototype.yMax1 = function(){
+    var a = this.contactY(this.posList);
+    return 32*(Math.max.apply(null, a)+1);
+};
+
+ConvertBlocks.prototype.yMin1 = function(){
+    var a = this.contactY(this.posList);
+    return 32*(Math.min.apply(null, a));
+};
+
+ConvertBlocks.prototype.xMax1 = function(){
+    var a = this.contactX(this.posList);
+    return 32*(Math.max.apply(null, a)+1);
+};
+
+ConvertBlocks.prototype.xMin1 = function(){
+    var a = this.contactX(this.posList);
+    return 32*(Math.min.apply(null, a));
+};
+
+ConvertBlocks.prototype.centerXY = function(){
+    var x = (this.xMax1() + this.xMin1())/2 ;
+    var y = (this.yMax1() + this.yMin1())/2 ;
+    return [x,y]
+};
+
+
+ConvertBlocks.prototype.compareX = function(arr,arr1){
+    if(arr[0]==arr1[0]){
+        return true
+    }else{
+        return false
+    }
+};
+
+ConvertBlocks.prototype.compareY = function(arr,arr1){
+    if(arr[1]==arr1[1]){
+        return true
+    }else{
+        return false
+    }
+};
+
+ConvertBlocks.prototype.convert = function(xx){
+    var t = [];
+    var order = true;
+    for(var x in xx){
+        var x1  = ~~(x.replace('x',''));
+        var xLoc0 = x1*32;
+        var xLoc1 = (x1+1)*32;
+        var yLoc0 = xx[x][0]*32;
+        var yLoc1 = (xx[x][xx[x].length-1]+1)*32;
+        t.push([xLoc0,yLoc0,xLoc1,yLoc1]);
+    }
+    return t;
+};
+
+ConvertBlocks.prototype.becomeArr =  function(bb,distance){
+    var matrix1 = new createjs.Matrix2D(1,0,0,1,distance,distance);
+    var matrix2 = new createjs.Matrix2D(1,0,0,1,-distance,distance);
+    var matrix3 = new createjs.Matrix2D(1,0,0,1,-distance,-distance);
+    var matrix4 = new createjs.Matrix2D(1,0,0,1,distance,-distance);
+    var t1 = [];
+    var xy = this.centerXY(bb);
+    for(var i=0;i<bb.length;i=i+2){
+        if(bb[i]<xy[0] && bb[i+1]<xy[1]){
+            var xt = matrix1.transformPoint(bb[i],bb[i+1]);
+            t1.push(xt.x);
+            t1.push(xt.y);
+        }
+        if(bb[i]>=xy[0] && bb[i+1]<xy[1]){
+            var xt = matrix2.transformPoint(bb[i],bb[i+1]);
+            t1.push(xt.x);
+            t1.push(xt.y);
+        }
+        if(bb[i]>=xy[0] && bb[i+1]>=xy[1]){
+            var xt = matrix3.transformPoint(bb[i],bb[i+1]);
+            t1.push(xt.x);
+            t1.push(xt.y);
+        }
+        if(bb[i]<xy[0] && bb[i+1]>=xy[1]){
+            var xt = matrix4.transformPoint(bb[i],bb[i+1]);
+            t1.push(xt.x);
+            t1.push(xt.y);
+        }
+    }
+    return t1;
+};
+
+/*var cc = new ConvertBlocks();
+var tt =cc.convertPos( cc.convert(cc.followX()) );
+var bb= cc.orderPos(cc.onlyPos(tt));
+var qq = cc.becomeArr(bb,16);*/
